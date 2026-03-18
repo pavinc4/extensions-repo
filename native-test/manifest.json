@@ -1,0 +1,17 @@
+{
+    "id": "native-test",
+    "name": "Native Test",
+    "version": "1.0.0",
+    "author": "Danhawk",
+    "description": "Tests native engine — spawns test.exe on enable, kills on disable.",
+    "engine": "native",
+    "entry": "test.exe",
+    "category": "Dev",
+    "icon": "FlaskConical",
+    "icon_color": "#a855f7",
+    "icon_bg": "#1a0a2e",
+    "targets": [
+        "global"
+    ],
+    "source_visible": false
+}
