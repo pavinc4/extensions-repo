@@ -1,0 +1,48 @@
+{
+    "id": "ui-test",
+    "name": "UI Zone Tester",
+    "version": "1.0.0",
+    "author": "Danhawk",
+    "description": "Tests every injectable UI zone. Delete after layout is locked.",
+    "engine": "command",
+    "entry": "noop.ps1",
+    "category": "Dev",
+    "icon": "FlaskConical",
+    "icon_color": "#a855f7",
+    "icon_bg": "#1a0a2e",
+    "targets": [
+        "global"
+    ],
+    "source_visible": false,
+    "ui": {
+        "detail_actions": [
+            {
+                "type": "action-button",
+                "label": "Open Config"
+            },
+            {
+                "type": "action-button",
+                "label": "View Logs"
+            }
+        ],
+        "detail_tabs": [
+            {
+                "type": "full-panel",
+                "label": "App",
+                "id": "configure"
+            },
+            {
+                "type": "full-panel",
+                "label": "Logs",
+                "id": "logs"
+            }
+        ],
+        "side_panel": {
+            "type": "info-panel"
+        },
+        "status_bar": {
+            "type": "status-text",
+            "label": "engine: command · zone tester active"
+        }
+    }
+}
