@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Any Downloader</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+html,body{height:100%;overflow:hidden;background:#0d0d0d;color:#e8e8e8;font-family:system-ui,-apple-system,sans-serif;font-size:13px;-webkit-font-smoothing:antialiased}
+input,textarea{-webkit-user-select:text;user-select:text}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
+
+/* Layout */
+#app{display:flex;flex-direction:column;height:100%}
+#titlebar{display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:44px;background:#0d0d0d;border-bottom:1px solid #1a1a1a;flex-shrink:0;cursor:default}
+#titlebar-left{display:flex;align-items:center;gap:8px}
+#icon{width:20px;height:20px;background:#1a0505;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#icon svg{width:12px;height:12px}
+#title{font-size:13px;font-weight:600;color:#e8e8e8}
+#close-btn{width:24px;height:24px;border:none;background:transparent;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#444;transition:color .15s,background .15s}
+#close-btn:hover{color:#888;background:#1a1a1a}
+
+#content{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+
+/* URL input */
+#url-row{display:flex;gap:8px}
+#url-wrap{flex:1;display:flex;align-items:center;gap:8px;padding:0 12px;background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;height:36px;transition:border-color .15s}
+#url-wrap:focus-within{border-color:#2a2a2a}
+#url-wrap svg{width:13px;height:13px;color:#333;flex-shrink:0}
+#url-input{flex:1;background:transparent;border:none;outline:none;color:#e8e8e8;font-size:12px;font-family:inherit}
+#url-input::placeholder{color:#2a2a2a}
+#clear-btn{background:none;border:none;cursor:pointer;color:#2a2a2a;display:none;padding:2px}
+#clear-btn:hover{color:#555}
+#fetch-btn{padding:0 14px;height:36px;background:#ef4444;color:white;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0;transition:opacity .15s}
+#fetch-btn:disabled{opacity:.4;cursor:not-allowed}
+#fetch-btn:hover:not(:disabled){opacity:.85}
+
+/* Error */
+#error-box{display:none;padding:10px 12px;background:#1a0505;border:1px solid #ef444430;border-radius:8px;font-size:11px;color:#ef4444;line-height:1.5;gap:8px;align-items:flex-start}
+#error-box.show{display:flex}
+#error-box svg{width:13px;height:13px;flex-shrink:0;margin-top:1px}
+
+/* Meta strip */
+#meta-strip{display:none;align-items:center;gap:10px;padding:8px 12px;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px}
+#meta-strip.show{display:flex}
+#meta-thumb{width:44px;height:30px;object-fit:cover;border-radius:3px;flex-shrink:0;display:none}
+#meta-thumb.show{display:block}
+#meta-info{flex:1;min-width:0}
+#meta-title{font-size:12px;font-weight:500;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#meta-sub{font-size:10px;color:#444;margin-top:2px}
+
+/* Tabs */
+#tabs{display:none;border-bottom:1px solid #1a1a1a;gap:16px}
+#tabs.show{display:flex}
+.tab-btn{padding-bottom:10px;font-size:12px;font-weight:500;background:none;border:none;cursor:pointer;color:#555;position:relative;transition:color .15s;text-transform:capitalize}
+.tab-btn.active{color:#ef4444}
+.tab-btn.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:#ef4444;border-radius:2px}
+
+/* Download panels */
+#audio-panel,#video-panel{display:none;flex-direction:column;gap:8px}
+#audio-panel.show,#video-panel.show{display:flex}
+#audio-cols{display:flex;gap:10px}
+.col{flex:1;display:flex;flex-direction:column;gap:6px}
+.col-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#333;font-weight:600;margin-bottom:2px}
+
+/* Download card */
+.dl-card{width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#0f0f0f;border:1px solid #1e1e1e;border-radius:8px;cursor:pointer;transition:border-color .15s;gap:10px}
+.dl-card:hover:not(:disabled){border-color:#2a2a2a}
+.dl-card:disabled{opacity:.45;cursor:not-allowed}
+.dl-card.done{border-color:#10b98140}
+.dl-card.error{border-color:#ef444440}
+.card-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.card-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#e8e8e8}
+.tag{padding:1px 6px;border-radius:3px;font-size:10px;font-weight:500}
+.tag-best{color:#10b981;background:#10b98118}
+.tag-small{color:#3b8bdb;background:#3b8bdb18}
+.tag-lossless{color:#a78bfa;background:#a78bfa18}
+.tag-original{color:#f59e0b;background:#f59e0b18}
+.card-sub{font-size:11px;color:#555}
+.card-progress{margin-top:4px}
+.prog-bar{height:2px;background:#1e1e1e;border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:#3b8bdb;border-radius:2px;transition:width .3s}
+.prog-meta{display:flex;gap:8px;margin-top:3px}
+.prog-meta span{font-size:10px;color:#333}
+.card-status-done{font-size:10px;color:#10b981;margin-top:2px}
+.card-status-err{font-size:10px;color:#ef4444;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.card-size{font-size:11px;color:#333;font-family:monospace}
+.card-icon{width:24px;height:24px;background:#1a1a1a;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-icon svg{width:12px;height:12px;color:#444;transition:color .15s}
+.dl-card:hover:not(:disabled) .card-icon svg{color:#888}
+.dl-card.done .card-icon svg{color:#10b981}
+
+/* Empty state */
+#empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;padding:40px 0}
+#empty-icon{width:48px;height:48px;background:#111;border:1px solid #1e1e1e;border-radius:12px;display:flex;align-items:center;justify-content:center}
+#empty-icon svg{width:22px;height:22px;color:#333}
+#empty p{font-size:13px;color:#555;font-weight:500}
+#empty span{font-size:11px;color:#333;text-align:center}
+
+/* Footer */
+#footer{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid #1a1a1a;background:#0a0a0a;flex-shrink:0}
+#footer svg{width:12px;height:12px;color:#333;flex-shrink:0}
+#folder-label{flex:1;font-size:11px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#browse-btn{font-size:11px;color:#444;background:none;border:none;cursor:pointer;padding:3px 8px;border-radius:4px;transition:color .15s,background .15s;flex-shrink:0}
+#browse-btn:hover{color:#888;background:#1a1a1a}
+#reset-btn{font-size:11px;color:#333;background:none;border:none;cursor:pointer;transition:color .15s;display:none;flex-shrink:0}
+#reset-btn:hover{color:#555}
+#reset-btn.show{display:block}
+
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{animation:spin .8s linear infinite;display:inline-block}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:fadein .2s ease-out both}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Title bar -->
+  <div id="titlebar">
+    <div id="titlebar-left">
+      <div id="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+      </div>
+      <span id="title">Any Downloader</span>
+    </div>
+    <button id="close-btn" onclick="window.close()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Scrollable content -->
+  <div id="content">
+
+    <!-- URL row -->
+    <div id="url-row">
+      <div id="url-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+        </svg>
+        <input id="url-input" type="text" placeholder="Paste YouTube, Instagram, Twitter URL..."/>
+        <button id="clear-btn" onclick="clearUrl()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <button id="fetch-btn" onclick="fetchInfo()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        Fetch
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div id="error-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="error-text"></span>
+    </div>
+
+    <!-- Meta strip -->
+    <div id="meta-strip">
+      <img id="meta-thumb" src="" alt=""/>
+      <div id="meta-info">
+        <div id="meta-title"></div>
+        <div id="meta-sub"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div id="tabs">
+      <button class="tab-btn active" onclick="switchTab('audio')" id="tab-audio">Audio</button>
+      <button class="tab-btn" onclick="switchTab('video')" id="tab-video">Video</button>
+    </div>
+
+    <!-- Audio panel -->
+    <div id="audio-panel">
+      <div id="audio-cols">
+        <div class="col" id="col-mp3">
+          <div class="col-label">MP3</div>
+        </div>
+        <div class="col" id="col-lossless">
+          <div class="col-label">Lossless / Original</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video panel -->
+    <div id="video-panel">
+      <div class="col-label" style="margin-bottom:2px">Video · MP4</div>
+      <div id="col-video"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty">
+      <div id="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+      </div>
+      <p>Paste a URL to get started</p>
+      <span>YouTube, Instagram, Twitter, Reddit, and 1000+ more</span>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div id="footer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+    </svg>
+    <span id="folder-label">Default — Downloads folder</span>
+    <button id="browse-btn" onclick="browseFolder()">Browse</button>
+    <button id="reset-btn" onclick="resetFolder()">Reset</button>
+  </div>
+
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let ytdlpExe  = 'yt-dlp';
+let ffmpegExe = 'ffmpeg';
+let probeData = null;
+let activeTab = 'audio';
+let outputDir = '';
+let dlStates  = {};
+let dlCounter = 0;
+
+// ── Bridge init (called from PowerShell after page loads) ─────────────────────
+function initBridge(ytdlp, ffmpeg) {
+  ytdlpExe  = ytdlp  || 'yt-dlp';
+  ffmpegExe = ffmpeg || 'ffmpeg';
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmtSize(b) {
+  if (!b) return '—';
+  if (b < 1024*1024) return (b/1024).toFixed(0)+' KB';
+  return (b/(1024*1024)).toFixed(1)+' MB';
+}
+function estSize(kbps, dur) { return fmtSize(kbps*1000*dur/8); }
+function fmtDur(s) { return Math.floor(s/60)+':'+(Math.floor(s%60)+'').padStart(2,'0'); }
+
+function svgDownload() {
+  return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+  </svg>`;
+}
+function svgCheck() {
+  return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+}
+function svgSpin() {
+  return `<svg class="spinner" width="12" height="12" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".2"/>
+    <path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/>
+  </svg>`;
+}
+
+// ── URL input ─────────────────────────────────────────────────────────────────
+document.getElementById('url-input').addEventListener('input', function() {
+  document.getElementById('clear-btn').style.display = this.value ? 'block' : 'none';
+});
+document.getElementById('url-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') fetchInfo();
+});
+
+function clearUrl() {
+  document.getElementById('url-input').value = '';
+  document.getElementById('clear-btn').style.display = 'none';
+  hideResults();
+}
+
+// ── Fetch / Probe ─────────────────────────────────────────────────────────────
+function fetchInfo() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) return;
+
+  setFetching(true);
+  hideError();
+  hideResults();
+
+  // Call PowerShell via window.external to run yt-dlp -J
+  try {
+    window.external.invoke(JSON.stringify({
+      cmd: 'probe',
+      url: url,
+      ytdlp: ytdlpExe
+    }));
+  } catch(e) {
+    // Dev mode fallback — simulate response
+    setFetching(false);
+    showError('Bridge not available in browser preview. Run via PowerShell.');
+  }
+}
+
+// Called back from PowerShell with probe result JSON
+function onProbeResult(jsonStr) {
+  setFetching(false);
+  try {
+    const data = JSON.parse(jsonStr);
+    if (data.error) { showError(data.error); return; }
+    probeData = data;
+    renderResults();
+  } catch(e) {
+    showError('Failed to parse response: ' + e.message);
+  }
+}
+
+function onProbeError(msg) {
+  setFetching(false);
+  showError(msg);
+}
+
+// ── Render results ────────────────────────────────────────────────────────────
+function renderResults() {
+  const d = probeData;
+  document.getElementById('empty').style.display = 'none';
+
+  // Meta strip
+  const strip = document.getElementById('meta-strip');
+  strip.classList.add('show', 'fadein');
+  document.getElementById('meta-title').textContent = d.title || 'Unknown';
+  document.getElementById('meta-sub').textContent =
+    fmtDur(d.duration||0) + ' · ' + (d.best_abr>=200?'320kbps':'128kbps') + ' source · ' + (d.video_res?.length||0) + ' resolutions';
+  if (d.thumbnail) {
+    const thumb = document.getElementById('meta-thumb');
+    thumb.src = d.thumbnail;
+    thumb.classList.add('show');
+  }
+
+  // Tabs
+  document.getElementById('tabs').classList.add('show');
+
+  // Build audio
+  buildAudioCards(d);
+  buildVideoCards(d);
+
+  switchTab(activeTab);
+}
+
+function buildAudioCards(d) {
+  const mp3Col      = document.getElementById('col-mp3');
+  const losslessCol = document.getElementById('col-lossless');
+
+  // Clear existing cards (keep label)
+  mp3Col.querySelectorAll('.dl-card').forEach(c => c.remove());
+  losslessCol.querySelectorAll('.dl-card').forEach(c => c.remove());
+
+  const fid  = d.best_fid || 'bestaudio';
+  const abr  = d.best_abr || 0;
+  const dur  = d.duration || 0;
+  const url  = document.getElementById('url-input').value.trim();
+
+  // 320kbps MP3 — only if source >= 200kbps
+  if (abr >= 200) {
+    mp3Col.appendChild(makeCard({
+      key: 'mp3-320',
+      label: '320 kbps',
+      sublabel: 'MP3 · highest quality',
+      size: d.best_size ? fmtSize(d.best_size) : estSize(abr, dur),
+      tag: 'best',
+      args: ['-f', fid, '-x', '--audio-format', 'mp3', '--audio-quality', '0', '--no-playlist', url]
+    }));
+  }
+
+  // 128kbps MP3
+  const label128 = (abr > 128 && abr < 200) ? '128 kbps+' : '128 kbps';
+  mp3Col.appendChild(makeCard({
+    key: 'mp3-128',
+    label: label128,
+    sublabel: 'MP3 · smaller file',
+    size: estSize(Math.min(abr, 128), dur),
+    tag: 'small',
+    args: ['-f', fid, '-x', '--audio-format', 'mp3', '--audio-quality', '5', '--no-playlist', url]
+  }));
+
+  // WAV
+  losslessCol.appendChild(makeCard({
+    key: 'wav',
+    label: 'WAV',
+    sublabel: 'Lossless · uncompressed',
+    size: estSize(1411, dur),
+    tag: 'lossless',
+    args: ['-f', fid, '-x', '--audio-format', 'wav', '--no-playlist', url]
+  }));
+
+  // Original
+  losslessCol.appendChild(makeCard({
+    key: 'original',
+    label: 'Original · ' + (d.best_ext||'webm').toUpperCase(),
+    sublabel: (abr||0).toFixed(0) + ' kbps · no conversion',
+    size: d.best_size ? fmtSize(d.best_size) : estSize(abr, dur),
+    tag: 'original',
+    args: ['-f', fid, '--no-playlist', url]
+  }));
+}
+
+function buildVideoCards(d) {
+  const col = document.getElementById('col-video');
+  col.innerHTML = '';
+  if (!d.video_res || !d.video_res.length) {
+    col.innerHTML = '<p style="font-size:11px;color:#333">No video streams found</p>';
+    return;
+  }
+  const url = document.getElementById('url-input').value.trim();
+  d.video_res.forEach(function(item) {
+    const h   = item.height;
+    const fid = item.fid;
+    const aq  = h >= 1080 ? 'bestaudio' : h >= 720 ? 'bestaudio[abr>=128]' : 'bestaudio[abr>=96]';
+    const lbl = {2160:'4K',1440:'1440p',1080:'1080p',720:'720p',480:'480p',360:'360p'}[h] || h+'p';
+    const anote = h >= 1080 ? 'best audio' : h >= 720 ? 'high audio' : 'decent audio';
+    col.appendChild(makeCard({
+      key: 'video-'+h,
+      label: lbl,
+      sublabel: 'MP4 · merged · '+anote,
+      size: '—',
+      args: ['-f', fid+'+'+aq, '--merge-output-format', 'mp4',
+             '--ffmpeg-location', ffmpegExe.replace('\\ffmpeg.exe','').replace('/ffmpeg',''),
+             '--no-playlist', url]
+    }));
+  });
+}
+
+// ── Card factory ──────────────────────────────────────────────────────────────
+function makeCard(opt) {
+  const tagMap = {
+    best:     {cls:'tag-best',    lbl:'Best'},
+    small:    {cls:'tag-small',   lbl:'Smaller'},
+    lossless: {cls:'tag-lossless',lbl:'Lossless'},
+    original: {cls:'tag-original',lbl:'Original'},
+  };
+  const t = opt.tag ? tagMap[opt.tag] : null;
+  const tagHtml = t ? `<span class="tag ${t.cls}">${t.lbl}</span>` : '';
+
+  const btn = document.createElement('button');
+  btn.className = 'dl-card fadein';
+  btn.id = 'card-'+opt.key;
+  btn.innerHTML = `
+    <div class="card-left">
+      <div class="card-label">${opt.label}${tagHtml}</div>
+      <div class="card-sub">${opt.sublabel}</div>
+    </div>
+    <div class="card-right">
+      <span class="card-size">${opt.size}</span>
+      <div class="card-icon">${svgDownload()}</div>
+    </div>`;
+
+  btn.onclick = function() { startDownload(opt.key, opt.args); };
+  return btn;
+}
+
+// ── Download ──────────────────────────────────────────────────────────────────
+function startDownload(key, args) {
+  const card = document.getElementById('card-'+key);
+  if (!card || card.disabled) return;
+
+  card.disabled = true;
+  card.querySelector('.card-icon').innerHTML = svgSpin();
+
+  // Add progress bar to card-left
+  const left = card.querySelector('.card-left');
+  let progDiv = card.querySelector('.card-progress');
+  if (!progDiv) {
+    progDiv = document.createElement('div');
+    progDiv.className = 'card-progress';
+    progDiv.innerHTML = `<div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div>
+      <div class="prog-meta"><span class="prog-pct">0%</span><span class="prog-spd"></span><span class="prog-eta"></span></div>`;
+    left.appendChild(progDiv);
+  }
+
+  const id = key + '-' + (++dlCounter);
+
+  try {
+    window.external.invoke(JSON.stringify({
+      cmd: 'download',
+      id: id,
+      key: key,
+      args: args,
+      outputDir: outputDir,
+      ytdlp: ytdlpExe,
+      ffmpeg: ffmpegExe
+    }));
+  } catch(e) {
+    card.disabled = false;
+    card.querySelector('.card-icon').innerHTML = svgDownload();
+    card.querySelector('.card-progress')?.remove();
+  }
+}
+
+// Called from PowerShell with progress updates
+function onProgress(key, pct, speed, eta) {
+  const card = document.getElementById('card-'+key);
+  if (!card) return;
+  const fill = card.querySelector('.prog-fill');
+  if (fill) fill.style.width = pct+'%';
+  const pctEl = card.querySelector('.prog-pct');
+  if (pctEl) pctEl.textContent = pct+'%';
+  const spdEl = card.querySelector('.prog-spd');
+  if (spdEl && speed) spdEl.textContent = speed;
+  const etaEl = card.querySelector('.prog-eta');
+  if (etaEl && eta) etaEl.textContent = 'ETA '+eta;
+}
+
+// Called from PowerShell when download finishes
+function onDone(key, success, errorMsg) {
+  const card = document.getElementById('card-'+key);
+  if (!card) return;
+  card.querySelector('.card-progress')?.remove();
+  if (success) {
+    card.classList.add('done');
+    card.querySelector('.card-icon').innerHTML = svgCheck();
+    const sub = card.querySelector('.card-sub');
+    if (sub) sub.textContent = 'Download complete';
+  } else {
+    card.classList.add('error');
+    card.querySelector('.card-icon').innerHTML = svgDownload();
+    card.disabled = false;
+    const left = card.querySelector('.card-left');
+    const err = document.createElement('div');
+    err.className = 'card-status-err';
+    err.textContent = errorMsg || 'Download failed';
+    left.appendChild(err);
+  }
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('audio-panel').classList.toggle('show', tab==='audio');
+  document.getElementById('video-panel').classList.toggle('show', tab==='video');
+}
+
+// ── Folder picker ─────────────────────────────────────────────────────────────
+function browseFolder() {
+  try {
+    window.external.invoke(JSON.stringify({ cmd: 'browse' }));
+  } catch(e) {}
+}
+function onFolderPicked(dir) {
+  outputDir = dir;
+  document.getElementById('folder-label').textContent = dir;
+  document.getElementById('reset-btn').classList.add('show');
+}
+function resetFolder() {
+  outputDir = '';
+  document.getElementById('folder-label').textContent = 'Default — Downloads folder';
+  document.getElementById('reset-btn').classList.remove('show');
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function setFetching(on) {
+  const btn = document.getElementById('fetch-btn');
+  btn.disabled = on;
+  btn.innerHTML = on
+    ? svgSpin() + ' Fetching...'
+    : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+       </svg> Fetch`;
+}
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  document.getElementById('error-text').textContent = msg;
+  box.classList.add('show');
+}
+function hideError() { document.getElementById('error-box').classList.remove('show'); }
+function hideResults() {
+  document.getElementById('meta-strip').classList.remove('show');
+  document.getElementById('tabs').classList.remove('show');
+  document.getElementById('audio-panel').classList.remove('show');
+  document.getElementById('video-panel').classList.remove('show');
+  document.getElementById('empty').style.display = 'flex';
+  probeData = null;
+}
+</script>
+</body>
+</html>
