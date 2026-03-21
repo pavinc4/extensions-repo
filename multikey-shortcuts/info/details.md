@@ -4,14 +4,14 @@ Sequential hotkey launcher — press a two-key chord to open apps and websites i
 
 ## How it works
 
-- Press the first chord key combo — a small tooltip shows available second keys
-- Press the second key within 2 seconds to fire the action
-- Press Escape, Space, or Enter to cancel the sequence silently
+- Press the first chord — a small tooltip shows available keys
+- Press the second key within 2 seconds to fire
+- Press anything else — sequence cancels silently
 
 ## Managing shortcuts
 
-Click **Manage Shortcuts** in the tool detail page to add, edit, or remove shortcuts for apps, links, and folders.
+Click **Manage Shortcuts** (when installed) to add, edit or remove shortcuts for apps, links and folders.
 
-## Notes
+## Engine
 
-Powered by AutoHotkey v2 — bundled inside the platform, no separate install needed. The AHK script stays running in the background while the tool is enabled and stops automatically when disabled or when the platform exits.
+Powered by bundled AutoHotkey64.exe — no installation needed.

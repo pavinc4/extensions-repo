@@ -1,0 +1,16 @@
+[
+    {
+        "id": "app_chrome",
+        "chord": ["Ctrl", "Alt", "C", "H"],
+        "name": "Google Chrome",
+        "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "type": "app"
+    },
+    {
+        "id": "link_yt",
+        "chord": ["Ctrl", "Alt", "Y", "T"],
+        "name": "YouTube",
+        "path": "https://youtube.com",
+        "type": "link"
+    }
+]
