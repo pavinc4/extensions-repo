@@ -1,0 +1,43 @@
+# Python virtual environments — never commit these
+venv/
+.venv/
+env/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Python build/dist artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Node (if any tool has a JS frontend source)
+node_modules/
+
+# React/Vite build output — only dist/ goes in repo, not source node_modules
+# Tools ship compiled dist/, not source node_modules
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.temp

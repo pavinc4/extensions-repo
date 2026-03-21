@@ -1,0 +1,16 @@
+[
+    {
+        "chord": "ctrlaltc",
+        "trigger": "Ctrl+Alt+C",
+        "key": "H",
+        "hint": "Google Chrome",
+        "action": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    },
+    {
+        "chord": "ctrlalty",
+        "trigger": "Ctrl+Alt+Y",
+        "key": "T",
+        "hint": "YouTube",
+        "action": "https://youtube.com"
+    }
+]

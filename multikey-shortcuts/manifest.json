@@ -4,16 +4,12 @@
     "version": "1.0.0",
     "author": "Danhawk",
     "description": "Sequential hotkey launcher — press a two-key chord to open apps and websites instantly.",
-    "engine": "ahk",
-    "entry": "shortcuts.ahk",
+    "entry": "run.ps1",
     "category": "Shortcuts",
     "icon": "Keyboard",
     "icon_color": "#F59E0B",
     "icon_bg": "#1c1008",
-    "targets": [
-        "global"
-    ],
-    "source_visible": false,
+    "targets": ["global"],
     "ui": {
         "detail_actions": [
             {

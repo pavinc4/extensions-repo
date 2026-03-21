@@ -1,16 +1,13 @@
 {
-  "id": "open-calculator",
-  "name": "Open Calculator",
-  "version": "1.0.0",
-  "author": "Danhawk",
-  "description": "Press Ctrl + Win + C to open the Windows Calculator.",
-  "engine": "command",
-  "entry": "run.ps1",
-  "category": "Launcher",
-  "icon": "Calculator",
-  "icon_color": "#60A5FA",
-  "icon_bg": "#0a1628",
-  "targets": [
-    "global"
-  ]
+    "id": "open-calculator",
+    "name": "Open Calculator",
+    "version": "1.0.0",
+    "author": "Danhawk",
+    "description": "Press Ctrl + Win + C to open the Windows Calculator from anywhere.",
+    "entry": "run.ps1",
+    "category": "Launcher",
+    "icon": "Calculator",
+    "icon_color": "#60A5FA",
+    "icon_bg": "#0a1628",
+    "targets": ["global"]
 }

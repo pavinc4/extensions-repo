@@ -4,16 +4,12 @@
     "version": "1.0.0",
     "author": "Danhawk",
     "description": "Tests every injectable UI zone. Delete after layout is locked.",
-    "engine": "command",
-    "entry": "noop.ps1",
+    "entry": "run.ps1",
     "category": "Dev",
     "icon": "FlaskConical",
     "icon_color": "#a855f7",
     "icon_bg": "#1a0a2e",
-    "targets": [
-        "global"
-    ],
-    "source_visible": false,
+    "targets": ["global"],
     "ui": {
         "detail_actions": [
             {
@@ -42,7 +38,7 @@
         },
         "status_bar": {
             "type": "status-text",
-            "label": "engine: command · zone tester active"
+            "label": "zone tester active"
         }
     }
 }

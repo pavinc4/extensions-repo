@@ -1,0 +1,13 @@
+{
+    "id": "any-downloader",
+    "name": "Any Downloader",
+    "version": "1.0.0",
+    "author": "Danhawk",
+    "description": "Download audio and video from YouTube and 1000+ sites. Supports MP3, WAV, and all available video resolutions.",
+    "entry": "run.ps1",
+    "category": "Media",
+    "icon": "Download",
+    "icon_color": "#EF4444",
+    "icon_bg": "#1a0505",
+    "targets": ["global"]
+}
